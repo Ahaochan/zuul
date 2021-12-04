@@ -63,6 +63,7 @@ public class ZuulServlet extends HttpServlet {
     @Override
     public void service(javax.servlet.ServletRequest servletRequest, javax.servlet.ServletResponse servletResponse) throws ServletException, IOException {
         try {
+            // 初始化当前线程的RequestContext上下文, 里面暂存servletRequest和servletResponse
             init((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse);
 
             // Marks this request as having passed through the "Zuul engine", as opposed to servlets
@@ -70,21 +71,27 @@ public class ZuulServlet extends HttpServlet {
             RequestContext context = RequestContext.getCurrentContext();
             context.setZuulEngineRan();
 
+            // 1. 先执行pre过滤器
             try {
+                // 任何一个pre过滤器抛出了异常, 就会执行error和post过滤器, 如果再异常就只执行error过滤器
                 preRoute();
             } catch (ZuulException e) {
                 error(e);
                 postRoute();
                 return;
             }
+            // 2. 然后执行post过滤器
             try {
+                // 任何一个route过滤器抛出了异常, 就会执行error和post过滤器, 如果再异常就只执行error过滤器
                 route();
             } catch (ZuulException e) {
                 error(e);
                 postRoute();
                 return;
             }
+            // 3. 再执行post过滤器
             try {
+                // 任何一个post过滤器抛出了异常, 就会执行error过滤器, 如果再异常就只执行error过滤器
                 postRoute();
             } catch (ZuulException e) {
                 error(e);
@@ -94,6 +101,7 @@ public class ZuulServlet extends HttpServlet {
         } catch (Throwable e) {
             error(new ZuulException(e, 500, "UNHANDLED_EXCEPTION_" + e.getClass().getName()));
         } finally {
+            // 清除当前线程的RequestContext
             RequestContext.getCurrentContext().unset();
         }
     }

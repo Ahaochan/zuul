@@ -68,13 +68,16 @@ public class ZuulRunner {
      */
     public void init(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
 
+        // 初始化当前线程的RequestContext
         RequestContext ctx = RequestContext.getCurrentContext();
+        // 往RequestContext里面暂存请求Request
         if (bufferRequests) {
             ctx.setRequest(new HttpServletRequestWrapper(servletRequest));
         } else {
             ctx.setRequest(servletRequest);
         }
 
+        // 往RequestContext里面暂存响应Response
         ctx.setResponse(new HttpServletResponseWrapper(servletResponse));
     }
 
