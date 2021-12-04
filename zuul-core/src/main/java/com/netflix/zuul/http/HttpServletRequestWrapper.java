@@ -97,6 +97,9 @@ public class HttpServletRequestWrapper extends javax.servlet.http.HttpServletReq
         } catch (IOException e) {
             throw new IllegalStateException("Cannot parse the request!", e);
         }
+        // ead90a17ed3506ea04994cc376619a0938a451b3
+        // 这个版本之前的返回的Request不是原生的HttpServletRequest, 所以在spring cloud netflix中重写了Servlet30RequestWrapper的getRequest()方法
+        // return new HttpServletRequestWrapper(req, contentData, parameters);
         return req;
     }
 

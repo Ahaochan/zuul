@@ -175,11 +175,13 @@ public class FilterLoader {
      */
     public List<ZuulFilter> getFiltersByType(String filterType) {
 
+        // 1. 根据类型从Map获取过滤器List
         List<ZuulFilter> list = hashFiltersByType.get(filterType);
         if (list != null) return list;
 
         list = new ArrayList<ZuulFilter>();
 
+        // 2. 动态加载过滤器
         Collection<ZuulFilter> filters = filterRegistry.getAllFilters();
         for (Iterator<ZuulFilter> iterator = filters.iterator(); iterator.hasNext(); ) {
             ZuulFilter filter = iterator.next();
@@ -187,8 +189,10 @@ public class FilterLoader {
                 list.add(filter);
             }
         }
+        // 3. 从小到大排序后的过滤器List
         Collections.sort(list); // sort by priority
 
+        // 4. 回写到Map
         hashFiltersByType.putIfAbsent(filterType, list);
         return list;
     }

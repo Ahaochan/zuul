@@ -150,16 +150,19 @@ public class FilterProcessor {
             Debug.addRoutingDebug("Invoking {" + sType + "} type filters");
         }
         boolean bResult = false;
+        // 1. 获取对应类型的, 从小到大排序后的过滤器List
         List<ZuulFilter> list = FilterLoader.getInstance().getFiltersByType(sType);
         if (list != null) {
             for (int i = 0; i < list.size(); i++) {
                 ZuulFilter zuulFilter = list.get(i);
+                // 2. 循环执行过滤器内的逻辑
                 Object result = processZuulFilter(zuulFilter);
                 if (result != null && result instanceof Boolean) {
                     bResult |= ((Boolean) result);
                 }
             }
         }
+        // 3. 如果任意一个过滤器的返回值result为true, 就返回true, 但是这个返回值没什么卵用
         return bResult;
     }
 
@@ -189,11 +192,13 @@ public class FilterProcessor {
                 Debug.addRoutingDebug("Filter " + filter.filterType() + " " + filter.filterOrder() + " " + filterName);
                 copy = ctx.copy();
             }
-            
+
+            // 执行filter的逻辑
             ZuulFilterResult result = filter.runFilter();
             ExecutionStatus s = result.getStatus();
             execTime = System.currentTimeMillis() - ltime;
 
+            // 判断执行结果成功还是失败
             switch (s) {
                 case FAILED:
                     t = result.getException();
@@ -210,10 +215,12 @@ public class FilterProcessor {
                 default:
                     break;
             }
-            
+
+            // 如果失败就抛出异常
             if (t != null) throw t;
 
             usageNotifier.notify(filter, s);
+            // 如果成功就返回自定义的值, 返回值没什么卵用
             return o;
 
         } catch (Throwable e) {

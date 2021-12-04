@@ -114,6 +114,7 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
             if (shouldFilter()) {
                 Tracer t = TracerFactory.instance().startMicroTracer("ZUUL::" + this.getClass().getSimpleName());
                 try {
+                    // 获取自定义的逻辑执行结果, 封装到ZuulFilterResult中
                     Object res = run();
                     zr = new ZuulFilterResult(res, ExecutionStatus.SUCCESS);
                 } catch (Throwable e) {
